@@ -1,0 +1,139 @@
+services:
+  database:
+    image: bitnamilegacy/postgresql:14.5.0
+    container_name: validator-postgres
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+      - db_data:/bitnami/postgresql
+    networks:
+      - ${VALIDATOR_NETWORK_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: validator-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    networks:
+        - ${VALIDATOR_NETWORK_NAME}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  validator:
+    build:
+      context: ../finlab-validator
+      dockerfile: Dockerfile
+    container_name: validator-service
+    environment:
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWD=${DB_PASSWD}
+      - DB_SCHEMA=${DB_SCHEMA}
+      - DB_JDBC=jdbc:postgresql://database:5432/${DB_NAME}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_DEFAULT_TTL=${REDIS_DEFAULT_TTL:-5m}
+      - SECURITY_API_KEY=${SECURITY_API_KEY}
+      - VALIDATOR_API_VERSION=${VALIDATOR_API_VERSION:-1}
+      - STRESS_TESTS_PATH=/stress_tests
+    volumes:
+      - ../stress_tests:/stress_tests
+    networks:
+      - ${VALIDATOR_NETWORK_NAME}
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  gateway:
+    build:
+      context: ../finlab-gateway
+      dockerfile: Dockerfile
+    container_name: finlab-gateway
+    environment:
+      - VALIDATOR_BASE_URL=http://validator:8080
+      - VALIDATOR_API_KEY=${SECURITY_API_KEY}
+      - VALIDATOR_API_VERSION=${VALIDATOR_API_VERSION:-1}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_AUTH_TTL=${REDIS_AUTH_TTL:-5m}
+      - SECURITY_API_KEY=${SECURITY_API_KEY}
+      - SECURITY_JWT_SECRET=${SECURITY_JWT_SECRET}
+    networks:
+      - ${VALIDATOR_NETWORK_NAME}
+    depends_on:
+      redis:
+        condition: service_healthy
+      validator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    build:
+      context: ..
+      dockerfile: infra/nginx/Dockerfile
+    container_name: finlab-client
+    ports:
+      - "443:443"
+    networks:
+      - ${VALIDATOR_NETWORK_NAME}
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "https://localhost:443"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  jmeter:
+    image: justb4/jmeter:5.5
+    container_name: validator-jmeter
+    volumes:
+      - ./jmeter:/tests
+      - ../stress_tests:/results
+    networks:
+      - ${VALIDATOR_NETWORK_NAME}
+    entrypoint: ["tail", "-f", "/dev/null"]
+
+networks:
+  validator-network:
+
+volumes:
+  db_data:
