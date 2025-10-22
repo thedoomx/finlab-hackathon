@@ -1,0 +1,52 @@
+app:
+  api:
+    version: ${VALIDATOR_API_VERSION:1}
+    base-path: /api/v${app.api.version}
+
+spring:
+  datasource:
+    url: ${DB_JDBC:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:connect}}
+    username: ${DB_USER:pguser}
+    password: ${DB_PASSWD:pgpasswd}
+    driver-class-name: org.postgresql.Driver
+    schema: ${DB_SCHEMA:hackathon}
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    schemas: ${DB_SCHEMA:hackathon}
+    default-schema: ${DB_SCHEMA:hackathon}
+    locations: classpath:db/migration
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 6000
+      default-ttl: ${REDIS_DEFAULT_TTL:15m}
+
+cache:
+  iban:
+    max-entries: ${IBAN_CACHE_MAX_ENTRIES:100000}
+
+logging:
+  level:
+    org.springframework.data.jpa.repository.query: DEBUG
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+security:
+  api-key: ${SECURITY_API_KEY:finlab-validator-api-key}
+
+stress-tests:
+  path: ${STRESS_TESTS_PATH:../stress_tests}
