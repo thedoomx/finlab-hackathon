@@ -8,8 +8,16 @@
       </div>
     </div>
 
-  <h2>Login</h2>
-  <input [(ngModel)]="username" placeholder="Username" />
-  <button (click)="login()">Login</button>
-  <p *ngIf="error" style="color:red">{{ error }}</p>
+  <div class="login-form">
+    <h2 class="mb-3">Login</h2>
+    <div class="form-group">
+      <input
+        class="form-control"
+        [(ngModel)]="username"
+        placeholder="Username"
+        (keyup.enter)="login()" />
+    </div>
+    <button class="btn btn-primary btn-block" (click)="login()">Login</button>
+    <p *ngIf="error" class="alert alert-danger mt-3">{{ error }}</p>
+  </div>
 </div>
