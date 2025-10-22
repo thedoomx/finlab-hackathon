@@ -1,0 +1,7 @@
+# Ignore all test result files
+*.jtl
+*.log
+*-report/
+
+# Keep this directory structure in git
+!.gitignore
