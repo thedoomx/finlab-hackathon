@@ -1,0 +1,48 @@
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+app:
+  api:
+    version: ${VALIDATOR_API_VERSION:1}
+
+my:
+  gateway:
+    validator-url: ${VALIDATOR_BASE_URL:http://localhost:8080}
+    validator-api-key: ${VALIDATOR_API_KEY:finlab-validator-api-key}
+
+spring:
+  application:
+    name: finlab-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: validator-service
+          uri: ${my.gateway.validator-url}
+          predicates:
+            - Path=/api/v${app.api.version}/**
+          filters:
+            - AddRequestHeader=X-API-KEY, ${my.gateway.validator-api-key}
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 6000
+
+
+redis:
+  auth-ttl: ${REDIS_AUTH_TTL:5m}
+
+security:
+  api-key: ${SECURITY_API_KEY:finlab-validator-api-key}
+  jwt:
+    secret: ${SECURITY_JWT_SECRET:12345678901234567890123456789033}
