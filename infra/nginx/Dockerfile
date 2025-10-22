@@ -6,7 +6,7 @@ COPY finlab-client/package*.json ./
 RUN npm ci
 
 COPY finlab-client/ ./
-RUN npm run build
+RUN npm run build -- --configuration production
 
 FROM nginx:alpine
 
