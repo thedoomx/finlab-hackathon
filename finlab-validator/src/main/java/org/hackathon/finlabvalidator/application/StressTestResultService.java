@@ -49,16 +49,35 @@ public class StressTestResultService implements IStressTestResultService {
             String testId = fileName.replace("-results.jtl", "");
             String testName = formatTestName(testId);
 
-            BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
-            LocalDateTime executionDate = LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(attrs.lastModifiedTime().toMillis()),
-                    ZoneId.systemDefault()
-            );
+            LocalDateTime executionDate = getExecutionDateFromJtl(path);
 
             return Optional.of(new TestResultListItem(testId, testName, executionDate, fileName));
         } catch (IOException e) {
             return Optional.empty();
         }
+    }
+
+    private LocalDateTime getExecutionDateFromJtl(Path path) throws IOException {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            reader.readLine();
+            String firstDataLine = reader.readLine();
+            if (firstDataLine != null) {
+                String[] fields = firstDataLine.split(",");
+                if (fields.length > 0) {
+                    long timestamp = Long.parseLong(fields[0]);
+                    return LocalDateTime.ofInstant(
+                            Instant.ofEpochMilli(timestamp),
+                            ZoneId.systemDefault()
+                    );
+                }
+            }
+        } catch (Exception e) {
+        }
+        BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+        return LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(attrs.lastModifiedTime().toMillis()),
+                ZoneId.systemDefault()
+        );
     }
 
     @Override
@@ -80,12 +99,7 @@ public class StressTestResultService implements IStressTestResultService {
         List<Long> responseTimes = new ArrayList<>();
         long successCount = 0;
         long failCount = 0;
-
-        BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
-        LocalDateTime executionDate = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(attrs.lastModifiedTime().toMillis()),
-                ZoneId.systemDefault()
-        );
+        LocalDateTime executionDate = getExecutionDateFromJtl(filePath);
 
         try (BufferedReader reader = Files.newBufferedReader(filePath)) {
             String line;

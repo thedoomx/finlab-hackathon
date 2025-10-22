@@ -37,10 +37,10 @@ export class StressTestResultService {
   ) {}
 
   listTestResults(): Observable<TestResultListItem[]> {
-    return this.http.get<TestResultListItem[]>(`${this.config.baseUrl}/results`);
+    return this.http.get<TestResultListItem[]>(`${this.config.baseUrl}/api/${this.config.apiVersion}/results`);
   }
 
   getTestResultSummary(testId: string): Observable<TestResultSummary> {
-    return this.http.get<TestResultSummary>(`${this.config.baseUrl}/results/${testId}`);
+    return this.http.get<TestResultSummary>(`${this.config.baseUrl}/api/${this.config.apiVersion}/results/${testId}`);
   }
 }
