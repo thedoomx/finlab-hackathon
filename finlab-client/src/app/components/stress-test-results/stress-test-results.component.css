@@ -1,0 +1,28 @@
+.status-success {
+  border-left: 4px solid #28a745;
+}
+
+.status-warning {
+  border-left: 4px solid #ffc107;
+}
+
+.status-danger {
+  border-left: 4px solid #dc3545;
+}
+
+.card {
+  transition: box-shadow 0.3s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+h2 {
+  margin-bottom: 1.5rem;
+}
+
+.table-responsive {
+  max-height: 500px;
+  overflow-y: auto;
+}

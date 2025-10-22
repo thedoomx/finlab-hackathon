@@ -1,0 +1,15 @@
+<div class="container mt-4">
+    <div class="welcome-section">
+      <div class="jumbotron text-center">
+        <h1 class="display-4">Welcome to FinLab Validator</h1>
+        <p class="lead">Please log in to start validating IBANs and checking account statuses.</p>
+        <hr class="my-4">
+        <p>Secure IBAN validation service for financial institutions.</p>
+      </div>
+    </div>
+
+  <h2>Login</h2>
+  <input [(ngModel)]="username" placeholder="Username" />
+  <button (click)="login()">Login</button>
+  <p *ngIf="error" style="color:red">{{ error }}</p>
+</div>

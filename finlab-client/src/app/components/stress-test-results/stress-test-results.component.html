@@ -1,0 +1,161 @@
+<div class="container mt-4">
+  <h2>Stress Test Results</h2>
+
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    {{ error }}
+  </div>
+
+  <div *ngIf="loading && !selectedTest" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && testResults.length === 0 && !error" class="alert alert-info">
+    No stress test results found. Run JMeter tests to see results here.
+  </div>
+
+  <div *ngIf="!selectedTest && testResults.length > 0" class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Available Test Results</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Test Name</th>
+                  <th>Execution Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let result of testResults">
+                  <td><strong>{{ result.testName }}</strong></td>
+                  <td>{{ result.executionDate | date:'medium' }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-primary" (click)="viewDetails(result.testId)">
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="selectedTest" class="row">
+    <div class="col-12">
+      <button class="btn btn-secondary mb-3" (click)="closeDetails()">
+        &larr; Back to List
+      </button>
+
+      <div class="card mb-3">
+        <div class="card-header">
+          <h4 class="mb-0">{{ selectedTest.testName }}</h4>
+          <small class="text-muted">Executed: {{ selectedTest.executionDate | date:'medium' }}</small>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <div class="card bg-light">
+                <div class="card-body text-center">
+                  <h6 class="text-muted">Total Requests</h6>
+                  <h3>{{ selectedTest.totalRequests }}</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card" [ngClass]="{
+                'bg-success text-white': selectedTest.errorRate === 0,
+                'bg-warning': selectedTest.errorRate > 0 && selectedTest.errorRate < 5,
+                'bg-danger text-white': selectedTest.errorRate >= 5
+              }">
+                <div class="card-body text-center">
+                  <h6 class="text-muted" [class.text-white]="selectedTest.errorRate === 0 || selectedTest.errorRate >= 5">Error Rate</h6>
+                  <h3>{{ selectedTest.errorRate }}%</h3>
+                  <small>{{ selectedTest.failedRequests }} / {{ selectedTest.totalRequests }} failed</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card" [ngClass]="{
+                'bg-success text-white': getPerformanceClass(selectedTest.testName, selectedTest.averageResponseTime) === 'status-success',
+                'bg-warning': getPerformanceClass(selectedTest.testName, selectedTest.averageResponseTime) === 'status-warning',
+                'bg-danger text-white': getPerformanceClass(selectedTest.testName, selectedTest.averageResponseTime) === 'status-danger'
+              }">
+                <div class="card-body text-center">
+                  <h6 class="text-muted" [class.text-white]="getPerformanceClass(selectedTest.testName, selectedTest.averageResponseTime) !== 'status-warning'">Avg Response Time</h6>
+                  <h3>{{ selectedTest.averageResponseTime }}ms</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-12">
+              <h5>Response Time Statistics</h5>
+              <table class="table table-bordered">
+                <thead class="thead-light">
+                  <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Minimum Response Time</td>
+                    <td>{{ selectedTest.minResponseTime }}ms</td>
+                  </tr>
+                  <tr>
+                    <td>Average Response Time</td>
+                    <td>{{ selectedTest.averageResponseTime }}ms</td>
+                  </tr>
+                  <tr>
+                    <td>90th Percentile (p90)</td>
+                    <td>{{ selectedTest.p90ResponseTime }}ms</td>
+                  </tr>
+                  <tr>
+                    <td>95th Percentile (p95)</td>
+                    <td>{{ selectedTest.p95ResponseTime }}ms</td>
+                  </tr>
+                  <tr>
+                    <td>Maximum Response Time</td>
+                    <td>{{ selectedTest.maxResponseTime }}ms</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-12">
+              <h5>Success/Failure Breakdown</h5>
+              <div class="progress" style="height: 30px;">
+                <div class="progress-bar bg-success" role="progressbar"
+                     [style.width.%]="(selectedTest.successfulRequests / selectedTest.totalRequests) * 100"
+                     [attr.aria-valuenow]="selectedTest.successfulRequests"
+                     [attr.aria-valuemin]="0"
+                     [attr.aria-valuemax]="selectedTest.totalRequests">
+                  {{ selectedTest.successfulRequests }} Success
+                </div>
+                <div class="progress-bar bg-danger" role="progressbar"
+                     [style.width.%]="(selectedTest.failedRequests / selectedTest.totalRequests) * 100"
+                     [attr.aria-valuenow]="selectedTest.failedRequests"
+                     [attr.aria-valuemin]="0"
+                     [attr.aria-valuemax]="selectedTest.totalRequests">
+                  {{ selectedTest.failedRequests }} Failed
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

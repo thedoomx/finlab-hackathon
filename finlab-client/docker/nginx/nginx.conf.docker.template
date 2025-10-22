@@ -1,0 +1,49 @@
+server {
+  listen 0.0.0.0:8080;
+  listen [::]:8080;
+
+  default_type application/octet-stream;
+
+  root        /usr/share/nginx/html;
+  include     /etc/nginx/mime.types;
+  try_files   $uri $uri/ /index.html = 404;
+
+  resolver 127.0.0.11 valid=30s;
+  
+  types {
+    # here are additional types
+    application/javascript mjs;
+  }
+
+  gzip                    on;
+  gzip_comp_level         6;
+  gzip_vary               on;
+  gzip_min_length         1000;
+  gzip_proxied            any;
+  gzip_types              text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+  gzip_buffers            16 8k;
+  client_max_body_size    256M;
+
+  location /health {
+    return 200 "Igor, it's alive!";
+  }
+
+  location /assets {
+    expires off;
+    add_header Cache-Control "no-cache, no-store, must-revalidate";
+  }
+
+  location ~ ^/api/([a-z-]*)/hubs/([^`]*)$ {
+    add_header x-hubs-url http://$1-api:8080/api/$1/hubs/$2?$args always;
+    proxy_pass http://$1-api:8080/api/$1/hubs/$2?$args;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+    proxy_set_header Host $host;
+  }
+
+  location ~ ^/api/([a-z-]*)/([^`]*)$ {
+    add_header x-api-url http://$1-api:8080/api/$1/$2?$args always;
+    proxy_pass http://$1-api:8080/api/$1/$2?$args;
+  }
+}

@@ -1,0 +1,64 @@
+<div class="container mt-4">
+
+  <div *ngIf="tokenService.exists()" class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">IBAN Lookup</h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="lookup()">
+            <div class="form-group">
+              <label for="ibanInput">Enter IBAN</label>
+              <input
+                type="text"
+                class="form-control"
+                id="ibanInput"
+                [(ngModel)]="iban"
+                name="iban"
+                placeholder="e.g., BG80BNBG96611020345678"
+                [disabled]="loading"
+              >
+            </div>
+            <div *ngIf="error" class="alert alert-danger" role="alert">
+              {{ error }}
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
+              <span *ngIf="loading" class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+              {{ loading ? 'Looking up...' : 'Lookup' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">History</h5>
+          <button *ngIf="history.length > 0" class="btn btn-sm btn-outline-secondary" (click)="clearHistory()">Clear</button>
+        </div>
+        <div class="card-body history-container">
+          <div *ngIf="history.length === 0" class="text-muted text-center py-4">
+            No lookups yet
+          </div>
+          <div *ngFor="let result of history" class="history-item" [ngClass]="getStatusClass(result.status)">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <strong>{{ result.iban }}</strong>
+                <div class="small text-muted">{{ result.timestamp | date:'short' }}</div>
+              </div>
+              <span class="badge badge-pill" [ngClass]="{
+                'badge-success': result.status.toUpperCase() === 'ALLOW',
+                'badge-warning': result.status.toUpperCase() === 'REVIEW',
+                'badge-danger': result.status.toUpperCase() === 'BLOCK'
+              }">
+                {{ result.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
