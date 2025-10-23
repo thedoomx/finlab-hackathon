@@ -52,7 +52,7 @@ Two JMeter stress test scenarios are available: normal load and extreme load.
 
 ### Prerequisites for Stress Tests
 
-You need a valid IBAN from the database. To get one, query the database or use this example: `BG88BANK37169467302950`
+You need a valid IBAN. To get one, query the database or Redis.
 
 ### Running Normal Load Test
 
