@@ -10,6 +10,8 @@ import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -76,6 +78,45 @@ public class IbanCacheWarmerIntegrationTest {
         assertThat(totalKeys).isNotNull();
         assertThat(totalKeys).isGreaterThan(0);
         assertThat(totalKeys).isLessThanOrEqualTo(maxEntries);
+    }
+
+    @Test
+    void warmCache_ConcurrentInvocation_ShouldPreventDuplicateExecution() throws InterruptedException {
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch finishLatch = new CountDownLatch(2);
+        AtomicInteger actualExecutions = new AtomicInteger(0);
+
+        Runnable warmupTask = () -> {
+            try {
+                startLatch.await();
+                cacheWarmer.warmCache()
+                        .doOnSuccess(v -> actualExecutions.incrementAndGet())
+                        .subscribe();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                finishLatch.countDown();
+            }
+        };
+
+        Thread thread1 = new Thread(warmupTask);
+        Thread thread2 = new Thread(warmupTask);
+
+        thread1.start();
+        thread2.start();
+
+        startLatch.countDown();
+        finishLatch.await();
+
+        Thread.sleep(3000);
+
+        Long keysCount = redisTemplate.keys("iban:*")
+                .collectList()
+                .map(list -> (long) list.size())
+                .block(Duration.ofSeconds(5));
+
+        assertThat(keysCount).isGreaterThan(0);
+        assertThat(actualExecutions.get()).isLessThanOrEqualTo(2);
     }
 
     private <T> T retryUntilStable(java.util.function.Supplier<T> operation, int maxRetries, long delayMillis) {
