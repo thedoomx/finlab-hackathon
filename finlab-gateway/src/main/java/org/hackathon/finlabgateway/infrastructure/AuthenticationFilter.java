@@ -19,6 +19,9 @@ import java.nio.charset.StandardCharsets;
 @Order(1)
 public class AuthenticationFilter implements GlobalFilter {
 
+    private static final String AUTH_PATH_PREFIX = "/auth/";
+    private static final String HEALTH_PATH_PREFIX = "/actuator/health";
+
     private final String expectedApiKey;
     private final SecretKey jwtKey;
     private final TokenService tokenService;
@@ -59,7 +62,7 @@ public class AuthenticationFilter implements GlobalFilter {
     }
 
     private boolean shouldBypassAuthentication(String path) {
-        return path.startsWith("/auth/") || path.startsWith("/actuator/health");
+        return path.startsWith(AUTH_PATH_PREFIX) || path.startsWith(HEALTH_PATH_PREFIX);
     }
 
     private boolean isApiKeyValid(ServerWebExchange exchange) {
