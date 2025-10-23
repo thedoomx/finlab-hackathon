@@ -7,6 +7,8 @@ import { StressTestResultService, TestResultListItem, TestResultSummary } from '
   styleUrls: ['./stress-test-results.component.css']
 })
 export class StressTestResultsComponent implements OnInit {
+  private readonly SUCCESS_THRESHOLD_RATIO = 0.6;
+
   testResults: TestResultListItem[] = [];
   selectedTest: TestResultSummary | null = null;
   loading: boolean = false;
@@ -58,7 +60,7 @@ export class StressTestResultsComponent implements OnInit {
     const isNormalLoad = testName.toLowerCase().includes('normal');
     const threshold = isNormalLoad ? 500 : 1000;
 
-    if (avgResponseTime < threshold * 0.6) return 'status-success';
+    if (avgResponseTime < threshold * this.SUCCESS_THRESHOLD_RATIO) return 'status-success';
     if (avgResponseTime < threshold) return 'status-warning';
     return 'status-danger';
   }
