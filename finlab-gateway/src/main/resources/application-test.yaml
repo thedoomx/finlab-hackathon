@@ -8,3 +8,4 @@ security:
   api-key: finlab-validator-test-api-key
   jwt:
     secret: 12345678901234567890123456789012
+    ttl: 1h

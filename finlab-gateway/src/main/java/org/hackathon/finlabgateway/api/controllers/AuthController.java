@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 
 @RestController
@@ -22,15 +23,18 @@ public class AuthController {
     private final TokenService tokenService;
     private final AuthSessionClient authSessionClient;
     private final SecretKey jwtKey;
+    private final long jwtExpirationMs;
 
     public AuthController(
             TokenService tokenService,
             AuthSessionClient authSessionClient,
-            @Value("${security.jwt.secret}") String jwtSecret
+            @Value("${security.jwt.secret}") String jwtSecret,
+            @Value("${security.jwt.ttl}") Duration jwtTtl
     ) {
         this.tokenService = tokenService;
         this.authSessionClient = authSessionClient;
         this.jwtKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        this.jwtExpirationMs = jwtTtl.toMillis();
     }
 
     @PostMapping("/login")
@@ -39,7 +43,7 @@ public class AuthController {
         String token = Jwts.builder()
                 .setSubject(loginRequest.username())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600_000))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(jwtKey, SignatureAlgorithm.HS256)
                 .compact();
 

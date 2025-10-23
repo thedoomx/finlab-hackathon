@@ -89,6 +89,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_AUTH_TTL=${REDIS_AUTH_TTL:-5m}
+      - AUTH_TTL=${AUTH_TTL:-1h}
       - SECURITY_API_KEY=${SECURITY_API_KEY}
       - SECURITY_JWT_SECRET=${SECURITY_JWT_SECRET}
     networks:
