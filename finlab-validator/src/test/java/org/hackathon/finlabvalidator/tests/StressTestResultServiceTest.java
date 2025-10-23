@@ -16,7 +16,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hackathon.finlabvalidator.application.StressTestResultService.RESULTS_JTL;
 
-public class StressTestResultServiceTest {
+class StressTestResultServiceTest {
 
     @TempDir
     Path tempDir;

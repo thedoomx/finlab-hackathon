@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class IbanCacheWarmerIntegrationTest {
+class IbanCacheWarmerIntegrationTest {
 
     @Autowired
     private IbanCacheWarmer cacheWarmer;

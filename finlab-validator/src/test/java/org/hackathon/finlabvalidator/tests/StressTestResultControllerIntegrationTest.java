@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestPropertySource(properties = {
         "stress-tests.path=${java.io.tmpdir}/stress_tests_test"
 })
-public class StressTestResultControllerIntegrationTest {
+class StressTestResultControllerIntegrationTest {
 
     @LocalServerPort
     private int port;
