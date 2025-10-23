@@ -10,11 +10,11 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hackathon.finlabvalidator.application.StressTestResultService.RESULTS_JTL;
 
 public class StressTestResultServiceTest {
 
@@ -90,7 +90,7 @@ public class StressTestResultServiceTest {
     @Test
     void getSummary_ShouldReturnSummary_WithCorrectMetrics() throws IOException {
         String testId = "normal-load";
-        createSampleJtlFile(testId + "-results.jtl");
+        createSampleJtlFile(testId + RESULTS_JTL);
 
         Optional<TestResultSummary> summary = service.getSummary(testId);
 
@@ -133,10 +133,10 @@ public class StressTestResultServiceTest {
         assertThat(summary).isPresent();
         TestResultSummary result = summary.get();
 
-        assertThat(result.totalRequests()).isEqualTo(0);
-        assertThat(result.averageResponseTime()).isEqualTo(0);
-        assertThat(result.minResponseTime()).isEqualTo(0);
-        assertThat(result.maxResponseTime()).isEqualTo(0);
+        assertThat(result.totalRequests()).isZero();
+        assertThat(result.averageResponseTime()).isZero();
+        assertThat(result.minResponseTime()).isZero();
+        assertThat(result.maxResponseTime()).isZero();
     }
 
     @Test

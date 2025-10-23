@@ -38,9 +38,6 @@ public class StressTestResultControllerIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @TempDir
-    Path tempDir;
-
     private String baseUrl() {
         return "http://localhost:" + port + "/api/v1/results";
     }

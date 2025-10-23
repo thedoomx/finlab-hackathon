@@ -72,7 +72,7 @@ public class AuthSessionRepository implements IAuthSessionRepository {
         String sql = String.format("SELECT id, token_hash, username, login_time, logout_time, status, created_at " +
                      "FROM %s.auth_sessions WHERE token_hash = ?", schemaName);
 
-        List<AuthSession> results = jdbcTemplate.query(sql, new Object[]{tokenHash}, (rs, rowNum) ->
+        List<AuthSession> results = jdbcTemplate.query(sql, (rs, rowNum) ->
                 new AuthSession(
                         rs.getLong("id"),
                         rs.getString("token_hash"),
@@ -82,7 +82,7 @@ public class AuthSessionRepository implements IAuthSessionRepository {
                         SessionStatus.valueOf(rs.getString("status")),
                         rs.getTimestamp("created_at").toLocalDateTime()
                 )
-        );
+        , tokenHash);
 
         return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
     }

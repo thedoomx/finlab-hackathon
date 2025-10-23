@@ -40,7 +40,7 @@ public class StressTestResultService implements IStressTestResultService {
         try (Stream<Path> paths = Files.walk(stressTestsPath, 1)) {
             return paths
                     .filter(Files::isRegularFile)
-                    .filter(p -> p.toString().endsWith("-results.jtl"))
+                    .filter(p -> p.toString().endsWith(RESULTS_JTL))
                     .map(this::toTestResultListItem)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
@@ -54,7 +54,7 @@ public class StressTestResultService implements IStressTestResultService {
     private Optional<TestResultListItem> toTestResultListItem(Path path) {
         try {
             String fileName = path.getFileName().toString();
-            String testId = fileName.replace("-results.jtl", "");
+            String testId = fileName.replace(RESULTS_JTL, "");
             String testName = formatTestName(testId);
 
             LocalDateTime executionDate = getExecutionDateFromJtl(path);
@@ -67,7 +67,10 @@ public class StressTestResultService implements IStressTestResultService {
 
     private LocalDateTime getExecutionDateFromJtl(Path path) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(path)) {
-            reader.readLine();
+            String headerLine = reader.readLine();
+            if (headerLine == null || headerLine.isEmpty()) {
+                log.debug("JTL file {} has no header line, falling back to file modification time", path.getFileName());
+            }
             String firstDataLine = reader.readLine();
             if (firstDataLine != null) {
                 String[] fields = firstDataLine.split(",");
