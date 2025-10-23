@@ -64,10 +64,12 @@ docker exec validator-jmeter sh -c "jmeter -n -t /tests/normal-load.jmx \
   -Jgateway.port=443 \
   -Japi.key=finlab-validator-api-key \
   -Jauth.username=jmeter-user \
-  -Jtest.iban=BG88BANK37169467302950 \
+  -Jtest.iban=<VALID_IBAN> \
   -l /results/normal-load-\$(date +%Y%m%d-%H%M%S)-results.jtl \
   -j /results/normal-load-\$(date +%Y%m%d-%H%M%S).log"
 ```
+
+**PowerShell Alternative:** Use `stress_tests/run-normal-load.ps1` (replace `<VALID_IBAN>` with your IBAN)
 
 ### Running Extreme Load Test
 
@@ -79,10 +81,12 @@ docker exec validator-jmeter sh -c "jmeter -n -t /tests/extreme-load.jmx \
   -Jgateway.port=443 \
   -Japi.key=finlab-validator-api-key \
   -Jauth.username=jmeter-user \
-  -Jtest.iban=BG88BANK37169467302950 \
+  -Jtest.iban=<VALID_IBAN> \
   -l /results/extreme-load-\$(date +%Y%m%d-%H%M%S)-results.jtl \
   -j /results/extreme-load-\$(date +%Y%m%d-%H%M%S).log"
 ```
+
+**PowerShell Alternative:** Use `stress_tests/run-extreme-load.ps1` (replace `<VALID_IBAN>` with your IBAN)
 
 ### Viewing Test Results
 

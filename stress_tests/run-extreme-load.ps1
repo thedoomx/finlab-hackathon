@@ -1,0 +1,1 @@
+$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"; docker exec validator-jmeter sh -c "jmeter -n -t /tests/extreme-load.jmx -Jgateway.host=nginx -Jgateway.port=443 -Japi.key=finlab-validator-api-key -Jauth.username=jmeter-user -Jtest.iban=BG00BANK14459365815085 -l /results/extreme-load-$timestamp-results.jtl -j /results/extreme-load-$timestamp.log"
