@@ -29,7 +29,9 @@ security:
 
 cache:
   iban:
-    max-entries: 100000
+    max-entries: ${IBAN_CACHE_MAX_ENTRIES:100000}
+    warmup:
+      enabled: ${IBAN_CACHE_WARMUP_ENABLED:false}
 
 logging:
   level:

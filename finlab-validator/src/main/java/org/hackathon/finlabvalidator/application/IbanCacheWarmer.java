@@ -26,19 +26,26 @@ public class IbanCacheWarmer {
     private final ReactiveStringRedisTemplate redis;
     private final Duration cacheTtl;
     private final long maxEntries;
+    private final boolean warmupEnabled;
 
     public IbanCacheWarmer(IIbanRepository repository,
                            ReactiveStringRedisTemplate redis,
                            org.hackathon.finlabvalidator.infrastructure.RedisConfig redisConfig,
-                           @Value("${cache.iban.max-entries}") long maxEntries) {
+                           @Value("${cache.iban.max-entries}") long maxEntries,
+                           @Value("${cache.iban.warmup.enabled:true}") boolean warmupEnabled) {
         this.repository = repository;
         this.redis = redis;
         this.cacheTtl = redisConfig.getDefaultTTL();
         this.maxEntries = maxEntries;
+        this.warmupEnabled = warmupEnabled;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void warmCacheOnStartup() {
+        if (!warmupEnabled) {
+            log.info("IBAN cache warm-up is disabled");
+            return;
+        }
         log.info("Scheduling IBAN cache warm-up to run in background...");
         warmCache().subscribeOn(reactor.core.scheduler.Schedulers.boundedElastic()).subscribe(
                 v -> log.info("Background cache warm-up completed successfully"),
