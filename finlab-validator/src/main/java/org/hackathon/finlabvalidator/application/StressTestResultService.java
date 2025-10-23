@@ -98,10 +98,31 @@ public class StressTestResultService implements IStressTestResultService {
     }
 
     private TestResultSummary parseJtlFile(Path filePath, String testId) throws IOException {
+        LocalDateTime executionDate = getExecutionDateFromJtl(filePath);
+        SampleDataCollection samples = extractSampleData(filePath);
+        TestMetrics metrics = calculateMetrics(samples);
+
+        return new TestResultSummary(
+                testId,
+                formatTestName(testId),
+                executionDate,
+                metrics.totalRequests(),
+                metrics.successfulRequests(),
+                metrics.failedRequests(),
+                metrics.errorRate(),
+                metrics.averageResponseTime(),
+                metrics.minResponseTime(),
+                metrics.maxResponseTime(),
+                metrics.p90ResponseTime(),
+                metrics.p95ResponseTime(),
+                metrics.throughput()
+        );
+    }
+
+    private SampleDataCollection extractSampleData(Path filePath) throws IOException {
         List<Long> responseTimes = new ArrayList<>();
         long successCount = 0;
         long failCount = 0;
-        LocalDateTime executionDate = getExecutionDateFromJtl(filePath);
 
         try (BufferedReader reader = Files.newBufferedReader(filePath)) {
             String line;
@@ -131,6 +152,14 @@ public class StressTestResultService implements IStressTestResultService {
             }
         }
 
+        return new SampleDataCollection(responseTimes, successCount, failCount);
+    }
+
+    private TestMetrics calculateMetrics(SampleDataCollection samples) {
+        List<Long> responseTimes = samples.responseTimes();
+        long successCount = samples.successCount();
+        long failCount = samples.failCount();
+
         long totalRequests = successCount + failCount;
         double errorRate = totalRequests > 0 ? (failCount * 100.0 / totalRequests) : 0.0;
 
@@ -144,23 +173,27 @@ public class StressTestResultService implements IStressTestResultService {
         long p95ResponseTime = getPercentile(responseTimes, 95);
 
         double throughput = 0.0;
+        double roundedErrorRate = Math.round(errorRate * 100.0) / 100.0;
 
-        return new TestResultSummary(
-                testId,
-                formatTestName(testId),
-                executionDate,
-                totalRequests,
-                successCount,
-                failCount,
-                Math.round(errorRate * 100.0) / 100.0,
-                avgResponseTime,
-                minResponseTime,
-                maxResponseTime,
-                p90ResponseTime,
-                p95ResponseTime,
-                throughput
-        );
+        return new TestMetrics(totalRequests, successCount, failCount, roundedErrorRate,
+                avgResponseTime, minResponseTime, maxResponseTime,
+                p90ResponseTime, p95ResponseTime, throughput);
     }
+
+    private record SampleDataCollection(List<Long> responseTimes, long successCount, long failCount) {}
+
+    private record TestMetrics(
+            long totalRequests,
+            long successfulRequests,
+            long failedRequests,
+            double errorRate,
+            long averageResponseTime,
+            long minResponseTime,
+            long maxResponseTime,
+            long p90ResponseTime,
+            long p95ResponseTime,
+            double throughput
+    ) {}
 
     private long getPercentile(List<Long> sortedValues, int percentile) {
         if (sortedValues.isEmpty()) return 0;
