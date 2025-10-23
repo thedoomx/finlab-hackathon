@@ -25,7 +25,7 @@
           </elementProp>
           <elementProp name="TEST_IBAN" elementType="Argument">
             <stringProp name="Argument.name">TEST_IBAN</stringProp>
-            <stringProp name="Argument.value">BG80BNBG96611020345678</stringProp>
+            <stringProp name="Argument.value">${__P(test.iban,BG88BANK37169467302950)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="API_KEY" elementType="Argument">
