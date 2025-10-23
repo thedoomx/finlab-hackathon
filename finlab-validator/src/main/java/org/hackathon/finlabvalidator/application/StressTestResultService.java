@@ -2,6 +2,8 @@ package org.hackathon.finlabvalidator.application;
 
 import org.hackathon.finlabvalidator.persistence.domain.TestResultListItem;
 import org.hackathon.finlabvalidator.persistence.domain.TestResultSummary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import java.util.stream.Stream;
 @Service
 public class StressTestResultService implements IStressTestResultService {
 
+    private static final Logger log = LoggerFactory.getLogger(StressTestResultService.class);
     private static final String SEPARATOR = ".";
 
     private final Path stressTestsPath;
@@ -74,6 +77,8 @@ public class StressTestResultService implements IStressTestResultService {
                 }
             }
         } catch (Exception e) {
+            log.debug("Could not parse timestamp from JTL file {}, falling back to file modification time: {}",
+                      path.getFileName(), e.getMessage());
         }
         BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
         return LocalDateTime.ofInstant(
@@ -148,6 +153,7 @@ public class StressTestResultService implements IStressTestResultService {
                         failCount++;
                     }
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                    log.debug("Skipping malformed line in JTL file {}: {}", filePath.getFileName(), e.getMessage());
                 }
             }
         }
