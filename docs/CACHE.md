@@ -10,8 +10,9 @@ The FinLab Validator uses Redis for caching with two primary cache types:
 ## Cache Settings
 
 ### JWT Token Cache
-- **TTL**: 1 hour (configurable via `REDIS_AUTH_TTL`)
-- **Storage**: Redis
+- **Token Expiration**: 1 hour (configurable via `AUTH_TTL`)
+- **Redis Storage TTL**: 1 hour (configurable via `REDIS_AUTH_TTL`)
+- **Storage**: Redis and Database
 - **Purpose**: Stateful JWT authentication, session management
 
 ### IBAN Lookup Cache
@@ -54,7 +55,7 @@ The database is pre-populated with 1,000,000 valid Bulgarian IBANs during initia
 - SQL migration script: `V3__seed_ibans_with_random_status.sql`
 - IBAN format: `BG` + 2 check digits + `BANK` + 14 random digits
 - Status distribution: Random (ALLOW, REVIEW, BLOCK)
-- Generation time: ~2-5 minutes on first startup
+- Generation time: ~1-2 minutes on first startup
 
 ## Configuration
 
@@ -65,6 +66,7 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_IBAN_TTL=60m
 REDIS_AUTH_TTL=1h
+AUTH_TTL=1h
 IBAN_CACHE_MAX_ENTRIES=1000000
 IBAN_CACHE_WARMUP_ENABLED=true
 ```
@@ -86,25 +88,7 @@ Client → Gateway → Validator → Redis (HIT) → Return cached result
 Client → Gateway → Validator → Redis (MISS) → PostgreSQL → Cache result → Return
 ```
 
-## Monitoring
-
-Check cache statistics:
-```bash
-docker exec validator-redis redis-cli INFO stats
-```
-
-View cached keys:
-```bash
-docker exec validator-redis redis-cli KEYS "*"
-```
-
-Check IBAN cache entries:
-```bash
-docker exec validator-redis redis-cli DBSIZE
-```
-
 ## Performance Impact
 
 - **Cache Hit**: < 5ms response time
-- **Cache Miss**: 50-200ms response time (includes DB query + cache update)
-- **Cache Hit Ratio**: Typically 85-95% in production workloads
+- **Cache Miss**: 50-150ms response time (includes DB query + cache update)
