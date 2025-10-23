@@ -8,16 +8,20 @@
       </div>
     </div>
 
-  <div class="login-form">
-    <h2 class="mb-3">Login</h2>
-    <div class="form-group">
-      <input
-        class="form-control"
-        [(ngModel)]="username"
-        placeholder="Username"
-        (keyup.enter)="login()" />
+  <div class="row justify-content-center">
+    <div class="col-md-4">
+      <div class="login-form">
+        <h2 class="mb-3 text-center">Login</h2>
+        <div class="form-group">
+          <input
+            class="form-control form-control-sm"
+            [(ngModel)]="username"
+            placeholder="Username"
+            (keyup.enter)="login()" />
+        </div>
+        <button class="btn btn-primary btn-sm btn-block" (click)="login()">Login</button>
+        <p *ngIf="error" class="alert alert-danger alert-sm mt-3">{{ error }}</p>
+      </div>
     </div>
-    <button class="btn btn-primary btn-block" (click)="login()">Login</button>
-    <p *ngIf="error" class="alert alert-danger mt-3">{{ error }}</p>
   </div>
 </div>
