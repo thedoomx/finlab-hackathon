@@ -6,7 +6,7 @@ import { API_CONFIG } from '../config/api-config';
 describe('AccountService', () => {
   let service: AccountService;
   let httpMock: HttpTestingController;
-  const mockApiConfig = { baseUrl: 'http://localhost:8081' };
+  const mockApiConfig = { baseUrl: 'http://localhost:8081', apiVersion: 'v1' };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -36,7 +36,7 @@ describe('AccountService', () => {
       expect(response).toBe(mockResponse);
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/accounts/${iban}`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/accounts/${iban}`);
     expect(req.request.method).toBe('GET');
     req.flush(mockResponse);
   });
@@ -49,7 +49,7 @@ describe('AccountService', () => {
       expect(response).toBe(mockResponse);
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/accounts/${iban}`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/accounts/${iban}`);
     req.flush(mockResponse);
   });
 
@@ -61,7 +61,7 @@ describe('AccountService', () => {
       expect(response).toBe(mockResponse);
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/accounts/${iban}`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/accounts/${iban}`);
     req.flush(mockResponse);
   });
 
@@ -75,7 +75,7 @@ describe('AccountService', () => {
       }
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/accounts/${iban}`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/accounts/${iban}`);
     req.flush('Not Found', { status: 404, statusText: 'Not Found' });
   });
 
@@ -89,7 +89,7 @@ describe('AccountService', () => {
       }
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/accounts/${iban}`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/accounts/${iban}`);
     req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
   });
 });

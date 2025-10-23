@@ -6,7 +6,7 @@ import { API_CONFIG } from '../config/api-config';
 describe('StressTestResultService', () => {
   let service: StressTestResultService;
   let httpMock: HttpTestingController;
-  const mockApiConfig = { baseUrl: 'http://localhost:8081' };
+  const mockApiConfig = { baseUrl: 'http://localhost:8081', apiVersion: 'v1' };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -49,7 +49,7 @@ describe('StressTestResultService', () => {
       expect(results.length).toBe(2);
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/results`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/results`);
     expect(req.request.method).toBe('GET');
     req.flush(mockResults);
   });
@@ -60,7 +60,7 @@ describe('StressTestResultService', () => {
       expect(results.length).toBe(0);
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/results`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/results`);
     req.flush([]);
   });
 
@@ -88,7 +88,7 @@ describe('StressTestResultService', () => {
       expect(summary.errorRate).toBe(5.0);
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/results/${testId}`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/results/${testId}`);
     expect(req.request.method).toBe('GET');
     req.flush(mockSummary);
   });
@@ -103,7 +103,7 @@ describe('StressTestResultService', () => {
       }
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/results/${testId}`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/results/${testId}`);
     req.flush('Not Found', { status: 404, statusText: 'Not Found' });
   });
 
@@ -115,7 +115,7 @@ describe('StressTestResultService', () => {
       }
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/results`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/results`);
     req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
   });
 
@@ -129,7 +129,7 @@ describe('StressTestResultService', () => {
       }
     });
 
-    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/results/${testId}`);
+    const req = httpMock.expectOne(`${mockApiConfig.baseUrl}/api/${mockApiConfig.apiVersion}/results/${testId}`);
     req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
   });
 });
