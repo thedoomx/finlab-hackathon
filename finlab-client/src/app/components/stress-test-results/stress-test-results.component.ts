@@ -54,12 +54,6 @@ export class StressTestResultsComponent implements OnInit {
     this.selectedTest = null;
   }
 
-  getStatusClass(errorRate: number): string {
-    if (errorRate === 0) return 'status-success';
-    if (errorRate < 5) return 'status-warning';
-    return 'status-danger';
-  }
-
   getPerformanceClass(testName: string, avgResponseTime: number): string {
     const isNormalLoad = testName.toLowerCase().includes('normal');
     const threshold = isNormalLoad ? 500 : 1000;
