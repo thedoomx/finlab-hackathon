@@ -4,7 +4,6 @@ import org.hackathon.finlabvalidator.persistence.domain.TestResultListItem;
 import org.hackathon.finlabvalidator.persistence.domain.TestResultSummary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
