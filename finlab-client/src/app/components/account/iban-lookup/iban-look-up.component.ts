@@ -41,7 +41,6 @@ export class IbanLookUpComponent implements OnDestroy {
 
     this.accountService.ibanLookup(this.iban.trim()).subscribe({
       next: status => {
-        debugger;
         this.history.unshift({
           iban: this.iban.trim(),
           status: status,
@@ -51,8 +50,6 @@ export class IbanLookUpComponent implements OnDestroy {
         this.iban = '';
       },
       error: err => {
-        debugger;
-
         this.error = 'Failed to lookup IBAN';
         this.loading = false;
       }

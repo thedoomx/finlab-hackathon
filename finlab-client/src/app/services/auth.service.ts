@@ -11,10 +11,6 @@ export class AuthService {
 
   constructor(private http: HttpClient, @Inject(API_CONFIG) private config: ApiConfig) {}
 
-  test(): Observable<string> {
-    return this.http.get<string>(`${this.config.baseUrl}/auth/test`);
-  }
-
   login(username: string): Observable<string> {
     return this.http.post(`${this.config.baseUrl}/auth/login`, { username }, { responseType: 'text' });
   }
