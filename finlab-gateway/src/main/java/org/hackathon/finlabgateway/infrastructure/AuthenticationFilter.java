@@ -35,45 +35,61 @@ public class AuthenticationFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
         String path = exchange.getRequest().getURI().getPath();
-        if (path.startsWith("/auth/") || path.startsWith("/actuator/health")) {
+        if (shouldBypassAuthentication(path)) {
             return chain.filter(exchange);
         }
 
-        String apiKey = exchange.getRequest().getHeaders().getFirst(AuthConstants.API_KEY_HEADER);
-        if (apiKey == null || !apiKey.equals(expectedApiKey)) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+        if (!isApiKeyValid(exchange)) {
+            return unauthorized(exchange);
         }
 
+        String token = extractBearerToken(exchange);
+        if (token == null) {
+            return unauthorized(exchange);
+        }
+
+        String username = parseJwtToken(token);
+        if (username == null) {
+            return unauthorized(exchange);
+        }
+
+        return tokenService.isValid(username, token)
+                .flatMap(valid -> valid ? chain.filter(exchange) : unauthorized(exchange));
+    }
+
+    private boolean shouldBypassAuthentication(String path) {
+        return path.startsWith("/auth/") || path.startsWith("/actuator/health");
+    }
+
+    private boolean isApiKeyValid(ServerWebExchange exchange) {
+        String apiKey = exchange.getRequest().getHeaders().getFirst(AuthConstants.API_KEY_HEADER);
+        return apiKey != null && apiKey.equals(expectedApiKey);
+    }
+
+    private String extractBearerToken(ServerWebExchange exchange) {
         String authHeader = exchange.getRequest().getHeaders().getFirst(AuthConstants.AUTH_HEADER);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            return null;
         }
+        return authHeader.substring(AuthConstants.BEARER_PREFIX.length());
+    }
 
-        String token = authHeader.substring(AuthConstants.BEARER_PREFIX.length());
-        String username;
+    private String parseJwtToken(String token) {
         try {
-            username = Jwts.parserBuilder()
+            return Jwts.parserBuilder()
                     .setSigningKey(jwtKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody()
                     .getSubject();
         } catch (Exception e) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            return null;
         }
+    }
 
-        return tokenService.isValid(username, token)
-                .flatMap(valid -> {
-                    if (!valid) {
-                        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                        return exchange.getResponse().setComplete();
-                    }
-                    return chain.filter(exchange);
-                });
+    private Mono<Void> unauthorized(ServerWebExchange exchange) {
+        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        return exchange.getResponse().setComplete();
     }
 }
