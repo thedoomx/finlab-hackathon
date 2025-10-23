@@ -4,12 +4,26 @@ A microservices-based IBAN validation system with JWT authentication, Redis cach
 
 ## Architecture
 
+![Architecture Diagram](docs/architecture.drawio.png)
+
+The system consists of the following components:
+
 - **Frontend**: Angular with Nginx
 - **API Gateway**: Spring Cloud Gateway
 - **Validator Service**: Spring Boot microservice
 - **Database**: PostgreSQL
 - **Cache**: Redis
 - **Testing**: JMeter
+
+**Request Flow:**
+1. Client App → Nginx (HTTPS :443)
+2. Nginx → API Gateway (/api/v1/**)
+3. Gateway validates JWT (from Redis) → Validator Service (X-API-KEY)
+4. Validator checks Redis cache first
+5. If cache miss, queries PostgreSQL
+6. Returns ALLOW/REVIEW/BLOCK decision
+
+> **Note**: To view/edit the architecture diagram, open `docs/architecture.drawio` in [diagrams.net](https://app.diagrams.net/) or VS Code with the Draw.io extension. Export as PNG to update the image in the README.
 
 ## Prerequisites
 
@@ -82,7 +96,13 @@ After running the tests, view the results in the web UI:
 
 - Stateful JWT authentication with Redis
 - IBAN validation using JDBC/JdbcTemplate
-- 1M valid Bulgarian IBANs pre-generated in database
+- 1,000,000 valid Bulgarian IBANs pre-generated in database
+- Redis cache with automatic warmup (1M max entries, 60min TTL for production)
 - Real-time stress test result visualization
 - Response time metrics (average, min, max, P90, P95)
 - Error rate tracking
+
+## Documentation
+
+- [Architecture Diagram](docs/architecture.drawio) - System architecture and request flow
+- [Cache Configuration](docs/CACHE.md) - Redis cache setup, warmup, and monitoring

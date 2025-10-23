@@ -1,0 +1,87 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="FinLab Validator Architecture" id="architecture">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="client" value="Client App&#xa;(Angular)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="nginx" value="Nginx&#xa;(Reverse Proxy)&#xa;TLS :443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="280" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gateway" value="API Gateway&#xa;(Spring Cloud)&#xa;JWT Validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="480" y="200" width="140" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="validator" value="Validator Service&#xa;(Accounts)&#xa;IBAN Risk Check" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="720" y="200" width="140" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="redis" value="Redis&#xa;(Cache)&#xa;JWT + IBAN" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="750" y="360" width="80" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="postgres" value="PostgreSQL&#xa;(Database)&#xa;1M IBANs" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="750" y="520" width="80" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arrow1" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="client" target="nginx">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arrow2" value="/api/v1/**" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="nginx" target="gateway">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arrow3" value="X-API-KEY&#xa;Bearer Token" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="gateway" target="validator">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arrow4" value="1. Check Cache" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=12;strokeColor=#b85450;" edge="1" parent="1" source="validator" target="redis">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arrow5" value="2. If miss&#xa;Query DB" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=12;strokeColor=#9673a6;dashed=1;" edge="1" parent="1" source="redis" target="postgres">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="response" value="ALLOW / REVIEW / BLOCK" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;strokeWidth=2;fontSize=12;strokeColor=#00cc00;dashed=1;" edge="1" parent="1" source="validator" target="gateway">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="response2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;strokeWidth=2;fontSize=12;strokeColor=#00cc00;dashed=1;" edge="1" parent="1" source="gateway" target="nginx">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="response3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;strokeWidth=2;fontSize=12;strokeColor=#00cc00;dashed=1;" edge="1" parent="1" source="nginx" target="client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="title" value="FinLab Validator - System Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="320" y="80" width="400" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" value="Request Flow (solid) → | Response Flow (dashed) ←" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="350" y="660" width="340" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="auth-note" value="Gateway validates JWT from Redis&#xa;Microservice validates X-API-KEY" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="360" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cache-note" value="Redis Cache:&#xa;• JWT tokens (1h TTL)&#xa;• IBAN lookups (10m TTL)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="450" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="network" value="Docker Network: validator-network" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3399ff;fontSize=12;fontStyle=2;dashed=1;dashPattern=5 5;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="860" height="480" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
