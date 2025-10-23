@@ -24,13 +24,13 @@ public class IbanRepository implements IIbanRepository {
 
     public Optional<IbanDto> findByIban(String iban) {
         String sql = String.format("SELECT id, iban, status FROM %s.iban WHERE iban = ?", schemaName);
-        List<IbanDto> results = jdbcTemplate.query(sql, new Object[]{iban}, (rs, rowNum) ->
-                new IbanDto(
-                        rs.getLong("id"),
-                        rs.getString("iban"),
-                        IbanStatus.valueOf(rs.getString("status"))
-                )
-        );
+        List<IbanDto> results = jdbcTemplate.query(sql, (rs, rowNum) ->
+                        new IbanDto(
+                                rs.getLong("id"),
+                                rs.getString("iban"),
+                                IbanStatus.valueOf(rs.getString("status"))
+                        )
+                , iban);
         return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
     }
 
