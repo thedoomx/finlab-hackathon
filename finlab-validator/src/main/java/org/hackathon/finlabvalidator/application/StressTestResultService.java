@@ -25,6 +25,8 @@ public class StressTestResultService implements IStressTestResultService {
 
     private static final Logger log = LoggerFactory.getLogger(StressTestResultService.class);
     private static final String SEPARATOR = ".";
+    private static final double PERCENTAGE_DENOMINATOR = 100.0;
+    private static final int INDEX_OFFSET = 1;
 
     private final Path stressTestsPath;
 
@@ -203,8 +205,9 @@ public class StressTestResultService implements IStressTestResultService {
 
     private long getPercentile(List<Long> sortedValues, int percentile) {
         if (sortedValues.isEmpty()) return 0;
-        int index = (int) Math.ceil(percentile / 100.0 * sortedValues.size()) - 1;
-        return sortedValues.get(Math.max(0, Math.min(index, sortedValues.size() - 1)));
+        int index = (int) Math.ceil(percentile / PERCENTAGE_DENOMINATOR * sortedValues.size()) - INDEX_OFFSET;
+        int lastIndex = sortedValues.size() - INDEX_OFFSET;
+        return sortedValues.get(Math.max(0, Math.min(index, lastIndex)));
     }
 
     private String formatTestName(String testId) {
