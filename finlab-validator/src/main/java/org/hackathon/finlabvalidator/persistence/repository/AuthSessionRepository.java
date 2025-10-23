@@ -20,9 +20,9 @@ public class AuthSessionRepository implements IAuthSessionRepository {
     private final String schemaName;
 
     public AuthSessionRepository(JdbcTemplate jdbcTemplate,
-                                  @Value("${spring.datasource.schema}") String schemaName) {
+                                 @Value("${spring.datasource.schema}") String schemaName) {
         this.jdbcTemplate = jdbcTemplate;
-        this.schemaName = schemaName;
+        this.schemaName = validateSchemaName(schemaName);
     }
 
     public AuthSession save(AuthSession session) {
@@ -33,9 +33,16 @@ public class AuthSessionRepository implements IAuthSessionRepository {
         }
     }
 
+    private String validateSchemaName(String schemaName) {
+        if (schemaName == null || !schemaName.matches("^[a-zA-Z0-9_]+$")) {
+            throw new IllegalArgumentException("Invalid schema name: " + schemaName);
+        }
+        return schemaName;
+    }
+
     private AuthSession insert(AuthSession session) {
         String sql = String.format("INSERT INTO %s.auth_sessions (token_hash, username, login_time, logout_time, status, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?)", schemaName);
+                "VALUES (?, ?, ?, ?, ?, ?)", schemaName);
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -58,7 +65,7 @@ public class AuthSessionRepository implements IAuthSessionRepository {
 
     private AuthSession update(AuthSession session) {
         String sql = String.format("UPDATE %s.auth_sessions SET logout_time = ?, status = ? " +
-                     "WHERE id = ?", schemaName);
+                "WHERE id = ?", schemaName);
 
         jdbcTemplate.update(sql,
                 session.getLogoutTime() != null ? Timestamp.valueOf(session.getLogoutTime()) : null,
@@ -70,19 +77,19 @@ public class AuthSessionRepository implements IAuthSessionRepository {
 
     public Optional<AuthSession> findByTokenHash(String tokenHash) {
         String sql = String.format("SELECT id, token_hash, username, login_time, logout_time, status, created_at " +
-                     "FROM %s.auth_sessions WHERE token_hash = ?", schemaName);
+                "FROM %s.auth_sessions WHERE token_hash = ?", schemaName);
 
         List<AuthSession> results = jdbcTemplate.query(sql, (rs, rowNum) ->
-                new AuthSession(
-                        rs.getLong("id"),
-                        rs.getString("token_hash"),
-                        rs.getString("username"),
-                        rs.getTimestamp("login_time").toLocalDateTime(),
-                        rs.getTimestamp("logout_time") != null ? rs.getTimestamp("logout_time").toLocalDateTime() : null,
-                        SessionStatus.valueOf(rs.getString("status")),
-                        rs.getTimestamp("created_at").toLocalDateTime()
-                )
-        , tokenHash);
+                        new AuthSession(
+                                rs.getLong("id"),
+                                rs.getString("token_hash"),
+                                rs.getString("username"),
+                                rs.getTimestamp("login_time").toLocalDateTime(),
+                                rs.getTimestamp("logout_time") != null ? rs.getTimestamp("logout_time").toLocalDateTime() : null,
+                                SessionStatus.valueOf(rs.getString("status")),
+                                rs.getTimestamp("created_at").toLocalDateTime()
+                        )
+                , tokenHash);
 
         return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
     }
@@ -99,7 +106,7 @@ public class AuthSessionRepository implements IAuthSessionRepository {
 
     public List<AuthSession> findAll() {
         String sql = String.format("SELECT id, token_hash, username, login_time, logout_time, status, created_at " +
-                     "FROM %s.auth_sessions", schemaName);
+                "FROM %s.auth_sessions", schemaName);
 
         return jdbcTemplate.query(sql, (rs, rowNum) ->
                 new AuthSession(
