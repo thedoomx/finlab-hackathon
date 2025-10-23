@@ -27,6 +27,7 @@ public class StressTestResultService implements IStressTestResultService {
     private static final String SEPARATOR = ".";
     private static final double PERCENTAGE_DENOMINATOR = 100.0;
     private static final int INDEX_OFFSET = 1;
+    public static final String RESULTS_JTL = "-results.jtl";
 
     private final Path stressTestsPath;
 
@@ -91,7 +92,7 @@ public class StressTestResultService implements IStressTestResultService {
 
     @Override
     public Optional<TestResultSummary> getSummary(String testId) {
-        Path filePath = stressTestsPath.resolve(testId + "-results.jtl");
+        Path filePath = stressTestsPath.resolve(testId + RESULTS_JTL);
 
         if (!Files.exists(filePath)) {
             return Optional.empty();

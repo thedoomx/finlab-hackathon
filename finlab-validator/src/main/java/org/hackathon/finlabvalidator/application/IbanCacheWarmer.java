@@ -1,7 +1,6 @@
 package org.hackathon.finlabvalidator.application;
 
 import org.hackathon.finlabvalidator.persistence.domain.IbanDto;
-import org.hackathon.finlabvalidator.persistence.domain.PaginatedResult;
 import org.hackathon.finlabvalidator.persistence.repository.IIbanRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

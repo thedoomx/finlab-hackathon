@@ -1,6 +1,5 @@
 package org.hackathon.finlabvalidator.application;
 
-import org.hackathon.finlabvalidator.persistence.domain.IbanDto;
 import org.hackathon.finlabvalidator.persistence.domain.IbanStatus;
 import org.hackathon.finlabvalidator.infrastructure.RedisConfig;
 import org.hackathon.finlabvalidator.persistence.repository.IIbanRepository;
