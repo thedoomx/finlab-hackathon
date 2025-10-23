@@ -26,7 +26,6 @@ The system consists of the following components:
 ## Prerequisites
 
 - Docker
-- Docker Compose
 
 ## How to Run
 
@@ -51,6 +50,7 @@ Two JMeter stress test scenarios are available: normal load and extreme load.
 ### Prerequisites for Stress Tests
 
 You need a valid IBAN. To get one, query the database or Redis.
+Redis and Database ports are intentionally exposed.
 
 ### Running Normal Load Test
 
