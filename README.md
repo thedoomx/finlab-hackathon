@@ -23,8 +23,6 @@ The system consists of the following components:
 5. If cache miss, queries PostgreSQL
 6. Returns ALLOW/REVIEW/BLOCK decision
 
-> **Note**: To view/edit the architecture diagram, open `docs/architecture.drawio` in [diagrams.net](https://app.diagrams.net/) or VS Code with the Draw.io extension.
-
 ## Prerequisites
 
 - Docker
