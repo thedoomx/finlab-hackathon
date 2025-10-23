@@ -21,6 +21,8 @@ import java.util.stream.Stream;
 @Service
 public class StressTestResultService implements IStressTestResultService {
 
+    private static final String SEPARATOR = ".";
+
     private final Path stressTestsPath;
 
     public StressTestResultService(@Value("${stress-tests.path:../stress_tests}") String stressTestsPath) {
@@ -167,6 +169,28 @@ public class StressTestResultService implements IStressTestResultService {
     }
 
     private String formatTestName(String testId) {
+        if (testId.matches(".*-\\d{8}-\\d{6}$")) {
+            String[] parts = testId.split("-");
+            int timestampStartIndex = parts.length - 2;
+
+            String baseName = Arrays.stream(parts)
+                    .limit(timestampStartIndex)
+                    .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
+                    .collect(Collectors.joining(" "));
+
+            String dateStr = parts[timestampStartIndex];
+            String formattedDate = dateStr.substring(0, 4) + SEPARATOR +
+                                   dateStr.substring(4, 6) + SEPARATOR +
+                                   dateStr.substring(6, 8);
+
+            String timeStr = parts[timestampStartIndex + 1];
+            String formattedTime = timeStr.substring(0, 2) + SEPARATOR +
+                                   timeStr.substring(2, 4) + SEPARATOR +
+                                   timeStr.substring(4, 6);
+
+            return baseName + " " + formattedDate + "_" + formattedTime;
+        }
+
         return Arrays.stream(testId.split("-"))
                 .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
                 .collect(Collectors.joining(" "));
